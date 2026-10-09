@@ -12,6 +12,8 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
   connectTimeout: 5000,
+  // Return DECIMAL columns (baths, lat/long, lot size) as numbers, not strings
+  decimalNumbers: true,
 });
 
 module.exports = pool;
