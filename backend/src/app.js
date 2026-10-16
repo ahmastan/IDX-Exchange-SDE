@@ -1,9 +1,14 @@
 const express = require("express");
 const cors = require("cors");
+const requestLogger = require("./middleware/requestLogger");
 const healthRouter = require("./routes/health");
 const propertiesRouter = require("./routes/properties");
 
 const app = express();
+
+// First, so the logged time covers every other middleware. Off under Jest
+// (which sets NODE_ENV=test) to keep test output readable.
+if (process.env.NODE_ENV !== "test") app.use(requestLogger());
 
 app.use(cors());
 app.use(express.json());

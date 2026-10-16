@@ -91,4 +91,4 @@ async function searchProperties({ filters, limit, offset }) {
   return { total, limit, offset, results };
 }
 
-module.exports = { buildWhereClause, searchProperties };
+module.exports = { buildWhereClause, parsePhotos, searchProperties };

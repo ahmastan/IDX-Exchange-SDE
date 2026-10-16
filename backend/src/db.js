@@ -14,6 +14,10 @@ const pool = mysql.createPool({
   connectTimeout: 5000,
   // Return DECIMAL columns (baths, lat/long, lot size) as numbers, not strings
   decimalNumbers: true,
+  // Return DATE/DATETIME/TIMESTAMP values exactly as stored ("2026-09-27").
+  // Otherwise they become JS Dates in the server's timezone and serialize as
+  // UTC, which can shift a date by a day.
+  dateStrings: true,
 });
 
 module.exports = pool;
