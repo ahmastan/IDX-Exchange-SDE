@@ -1,0 +1,60 @@
+.listings-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+
+.listings-page__header {
+  margin-bottom: 24px;
+}
+
+.listings-page__header h1 {
+  margin: 0 0 4px;
+  font-size: 2rem;
+}
+
+.listings-page__count {
+  margin: 0;
+  color: var(--muted-text);
+}
+
+/* As many 280px+ columns as fit, so the grid reflows from phone to desktop */
+.listings-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.listings-page__message {
+  padding: 48px 0;
+  text-align: center;
+  color: var(--muted-text);
+}
+
+.listings-page__error {
+  padding: 16px 20px;
+  border: 1px solid var(--error-border);
+  border-radius: 12px;
+  background: var(--error-surface);
+  color: var(--error-text);
+}
+
+.listings-page__error p {
+  margin: 0 0 12px;
+}
+
+.listings-page__error button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--error-text);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .listings-page {
+    padding: 20px 16px 32px;
+  }
+}
