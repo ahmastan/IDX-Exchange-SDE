@@ -20,4 +20,10 @@ export default defineConfig({
       "/api": { target: apiTarget, changeOrigin: true },
     },
   },
+  // Vitest reads this block. jsdom gives tests a fake browser DOM to render
+  // React components into.
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./src/test/setup.js"],
+  },
 });

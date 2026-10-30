@@ -31,6 +31,15 @@
   color: var(--muted-text);
 }
 
+.listings-page__message p {
+  margin: 0 0 6px;
+}
+
+.listings-page__empty-title {
+  color: var(--text);
+  font-weight: 600;
+}
+
 .listings-page__error {
   padding: 16px 20px;
   border: 1px solid var(--error-border);

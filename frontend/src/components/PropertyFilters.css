@@ -1,0 +1,73 @@
+.property-filters {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* As many 150px+ columns as fit: six across on desktop, two on a phone */
+.property-filters__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.property-filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted-text);
+}
+
+.property-filters__field input,
+.property-filters__field select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 400;
+}
+
+.property-filters__field input:focus,
+.property-filters__field select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.property-filters__error {
+  margin: 12px 0 0;
+  color: var(--error-text);
+  font-size: 0.9rem;
+}
+
+.property-filters__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.property-filters__actions button {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.property-filters__search {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.property-filters__clear {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}

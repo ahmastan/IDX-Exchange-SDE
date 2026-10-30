@@ -35,4 +35,9 @@ export default [
     files: ['vite.config.js'],
     languageOptions: { globals: globals.node },
   },
+  // Tests run under Vitest in Node with a jsdom browser environment
+  {
+    files: ['**/*.test.{js,jsx}', 'src/test/**'],
+    languageOptions: { globals: { ...globals.browser, ...globals.node } },
+  },
 ]
