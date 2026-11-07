@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { fetchProperties } from "../api/client";
@@ -131,5 +131,167 @@ describe("ListingsPage", () => {
     await user.click(screen.getByRole("button", { name: "Search" }));
 
     expect(await screen.findByText("Could not reach the property server.")).toBeInTheDocument();
+  });
+
+  describe("pagination", () => {
+    // One page of a larger result set, as the API would return it
+    function pageOf(total, offset, ...results) {
+      return { total, limit: 20, offset, results };
+    }
+
+    const pageButton = (n) => screen.getByRole("button", { name: `Page ${n}` });
+
+    beforeEach(() => {
+      // jsdom doesn't implement scrolling
+      vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("shows the controls below the grid with a results summary", async () => {
+      vi.mocked(fetchProperties).mockResolvedValueOnce(pageOf(1234, 0, listing(1, "1 All St")));
+      render(<ListingsPage />);
+      await screen.findByText("1 All St");
+
+      expect(screen.getByText("Showing 1-1 of 1,234 properties")).toBeInTheDocument();
+      const grid = screen.getByRole("region", { name: "Property results" });
+      const nav = screen.getByRole("navigation", { name: "Pagination" });
+      expect(grid.compareDocumentPosition(nav) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it("hides the controls when everything fits on one page", async () => {
+      vi.mocked(fetchProperties).mockResolvedValueOnce(pageOf(20, 0, listing(1, "1 All St")));
+      render(<ListingsPage />);
+      await screen.findByText("1 All St");
+
+      expect(screen.queryByRole("navigation", { name: "Pagination" })).not.toBeInTheDocument();
+    });
+
+    it("fetches the right offset, updates the summary and scrolls to the top", async () => {
+      vi.mocked(fetchProperties)
+        .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
+        .mockResolvedValueOnce(pageOf(45, 40, listing(2, "2 Last Page Ln")));
+      render(<ListingsPage />);
+      await screen.findByText("1 All St");
+
+      await user.click(pageButton(3));
+
+      expect(await screen.findByText("2 Last Page Ln")).toBeInTheDocument();
+      expect(fetchProperties).toHaveBeenLastCalledWith({ limit: 20, offset: 40 }, expect.anything());
+      expect(screen.getByText("Showing 41-41 of 45 properties")).toBeInTheDocument();
+      expect(window.scrollTo).toHaveBeenCalledExactlyOnceWith(0, 0);
+      expect(pageButton(3)).toHaveAttribute("aria-current", "page");
+    });
+
+    it("keeps the active filters when changing pages", async () => {
+      vi.mocked(fetchProperties)
+        .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
+        .mockResolvedValueOnce(pageOf(45, 0, listing(2, "2 Irvine Rd")))
+        .mockResolvedValueOnce(pageOf(45, 20, listing(3, "3 Irvine Rd")));
+      render(<ListingsPage />);
+      await screen.findByText("1 All St");
+      await user.type(screen.getByLabelText("City"), "Irvine");
+      await user.click(screen.getByRole("button", { name: "Search" }));
+      await screen.findByText("2 Irvine Rd");
+
+      await user.click(screen.getByRole("button", { name: "Next" }));
+
+      expect(await screen.findByText("3 Irvine Rd")).toBeInTheDocument();
+      expect(fetchProperties).toHaveBeenLastCalledWith(
+        { city: "Irvine", limit: 20, offset: 20 },
+        expect.anything()
+      );
+    });
+
+    it("goes back to page 1 when new filters are applied", async () => {
+      vi.mocked(fetchProperties)
+        .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
+        .mockResolvedValueOnce(pageOf(45, 40, listing(2, "2 Last Page Ln")))
+        .mockResolvedValueOnce(pageOf(45, 0, listing(3, "3 Irvine Rd")));
+      render(<ListingsPage />);
+      await screen.findByText("1 All St");
+      await user.click(pageButton(3));
+      await screen.findByText("2 Last Page Ln");
+
+      await user.type(screen.getByLabelText("City"), "Irvine");
+      await user.click(screen.getByRole("button", { name: "Search" }));
+
+      await screen.findByText("3 Irvine Rd");
+      expect(fetchProperties).toHaveBeenLastCalledWith(
+        { city: "Irvine", limit: 20, offset: 0 },
+        expect.anything()
+      );
+      expect(fetchProperties).toHaveBeenCalledTimes(3); // one request, not one per state change
+      expect(pageButton(1)).toHaveAttribute("aria-current", "page");
+    });
+
+    it("goes back to page 1 when filters are cleared", async () => {
+      vi.mocked(fetchProperties)
+        .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
+        .mockResolvedValueOnce(pageOf(45, 20, listing(2, "2 Next Page Ln")))
+        .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")));
+      render(<ListingsPage />);
+      await screen.findByText("1 All St");
+      await user.click(pageButton(2));
+      await screen.findByText("2 Next Page Ln");
+
+      await user.click(screen.getByRole("button", { name: "Clear Filters" }));
+
+      await screen.findByText("1 All St");
+      expect(fetchProperties).toHaveBeenLastCalledWith({ limit: 20, offset: 0 }, expect.anything());
+    });
+
+    it("ignores a slow response for a page the user has already left", async () => {
+      const second = deferred();
+      const third = deferred();
+      vi.mocked(fetchProperties)
+        .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
+        .mockReturnValueOnce(second.promise)
+        .mockReturnValueOnce(third.promise);
+      render(<ListingsPage />);
+      await screen.findByText("1 All St");
+      await user.click(pageButton(2));
+      // Loading: the controls are gone, so leave through a new search instead
+      await user.click(screen.getByRole("button", { name: "Clear Filters" }));
+
+      await act(async () => second.resolve(pageOf(45, 20, listing(2, "2 Stale Page Ln"))));
+      expect(screen.queryByText("2 Stale Page Ln")).not.toBeInTheDocument();
+
+      await act(async () => third.resolve(pageOf(45, 0, listing(1, "1 All St"))));
+      expect(screen.getByText("1 All St")).toBeInTheDocument();
+    });
+
+    it("moves to the new last page if the current page no longer exists", async () => {
+      vi.mocked(fetchProperties)
+        .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
+        .mockResolvedValueOnce(pageOf(30, 40))
+        .mockResolvedValueOnce(pageOf(30, 20, listing(2, "2 New Last Ln")));
+      render(<ListingsPage />);
+      await screen.findByText("1 All St");
+
+      await user.click(pageButton(3));
+
+      expect(await screen.findByText("2 New Last Ln")).toBeInTheDocument();
+      expect(fetchProperties).toHaveBeenLastCalledWith({ limit: 20, offset: 20 }, expect.anything());
+      expect(screen.queryByText("No properties found.")).not.toBeInTheDocument();
+    });
+
+    it("retries the page the user was on", async () => {
+      vi.mocked(fetchProperties)
+        .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
+        .mockRejectedValueOnce(new Error("Could not reach the property server."))
+        .mockResolvedValueOnce(pageOf(45, 20, listing(2, "2 Next Page Ln")));
+      render(<ListingsPage />);
+      await screen.findByText("1 All St");
+      await user.click(pageButton(2));
+      await screen.findByText("Could not reach the property server.");
+
+      await user.click(screen.getByRole("button", { name: "Try again" }));
+
+      expect(await screen.findByText("2 Next Page Ln")).toBeInTheDocument();
+      expect(fetchProperties).toHaveBeenLastCalledWith({ limit: 20, offset: 20 }, expect.anything());
+    });
   });
 });
