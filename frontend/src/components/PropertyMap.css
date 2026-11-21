@@ -1,0 +1,31 @@
+.property-map__frame {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 260px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--muted-surface);
+}
+
+.property-map__missing-key {
+  margin: 0;
+  padding: 24px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--muted-surface);
+  color: var(--muted-text);
+  text-align: center;
+}
+
+.property-map__directions {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.property-map__directions:hover {
+  text-decoration: underline;
+}

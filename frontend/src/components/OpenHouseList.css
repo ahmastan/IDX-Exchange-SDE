@@ -1,0 +1,58 @@
+.open-houses {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.open-houses__item {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.open-houses__item--past {
+  border-left-color: var(--muted-surface);
+}
+
+.open-houses__item--past .open-houses__when {
+  color: var(--muted-text);
+}
+
+.open-houses__when p {
+  margin: 0;
+}
+
+.open-houses__date {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.open-houses__badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--muted-surface);
+  color: var(--muted-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.open-houses__time {
+  color: var(--muted-text);
+}
+
+.open-houses__remarks {
+  margin: 8px 0 0;
+  white-space: pre-line;
+}
+
+.open-houses__empty {
+  margin: 0;
+  color: var(--muted-text);
+}

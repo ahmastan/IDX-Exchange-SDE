@@ -1,16 +1,11 @@
-import { useState } from "react";
-import { getFirstPhoto } from "../utils/photos";
+import { Link } from "react-router-dom";
 import { formatNumber, formatPrice } from "../utils/format";
+import PropertyImageCarousel from "./PropertyImageCarousel";
 import "./PropertyCard.css";
 
 // RETS column names, for reference:
 //   L_SystemPrice = price, L_Keyword2 = beds, LM_Dec_3 = baths, LM_Int2_3 = sqft
 export default function PropertyCard({ property }) {
-  const photo = getFirstPhoto(property.L_Photos);
-  // A URL can be well-formed and still fail to load (expired or removed),
-  // so fall back to the placeholder on load errors too.
-  const [imageFailed, setImageFailed] = useState(false);
-
   const price = formatPrice(property.L_SystemPrice);
   const beds = formatNumber(property.L_Keyword2);
   const baths = formatNumber(property.LM_Dec_3);
@@ -20,19 +15,14 @@ export default function PropertyCard({ property }) {
   const cityState = [property.L_City?.trim(), property.L_State?.trim()].filter(Boolean).join(", ");
   const location = [cityState, property.L_Zip?.trim()].filter(Boolean).join(" ");
 
+  // The whole card is clickable through one real link (the address), stretched
+  // over the card with CSS. A real <a> means middle-click, "open in new tab"
+  // and keyboard Enter all work, and it avoids putting the carousel's buttons
+  // inside an <a>, which is invalid HTML.
   return (
     <article className="property-card">
       <div className="property-card__media">
-        {photo && !imageFailed ? (
-          <img
-            src={photo}
-            alt={`Photo of ${address}`}
-            loading="lazy"
-            onError={() => setImageFailed(true)}
-          />
-        ) : (
-          <div className="property-card__no-photo">No photo available</div>
-        )}
+        <PropertyImageCarousel photos={property.L_Photos} alt={`Photo of ${address}`} />
       </div>
 
       <div className="property-card__body">
@@ -42,7 +32,14 @@ export default function PropertyCard({ property }) {
           <li><strong>{baths ?? "—"}</strong> ba</li>
           <li><strong>{sqft ?? "—"}</strong> sqft</li>
         </ul>
-        <p className="property-card__address">{address}</p>
+        <p className="property-card__address">
+          <Link
+            to={`/property/${encodeURIComponent(property.L_ListingID)}`}
+            className="property-card__link"
+          >
+            {address}
+          </Link>
+        </p>
         {location && <p className="property-card__location">{location}</p>}
       </div>
     </article>

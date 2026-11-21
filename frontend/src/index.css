@@ -27,3 +27,14 @@ body {
   margin: 0;
   min-width: 320px;
 }
+
+.not-found {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.not-found a {
+  color: var(--accent);
+}

@@ -8,6 +8,11 @@ const apiTarget = process.env.API_PROXY_TARGET || "http://localhost:5000";
 
 export default defineConfig({
   plugins: [react()],
+  // Vite only exposes VITE_* variables to the browser by default. The guide
+  // uses CRA's REACT_APP_ prefix (REACT_APP_GOOGLE_MAPS_API_KEY), so allow
+  // both. Anything with these prefixes ends up in the shipped JavaScript, so
+  // never give a secret one of them.
+  envPrefix: ["VITE_", "REACT_APP_"],
   server: {
     // The guide's data flow puts React on port 3000. strictPort makes Vite
     // fail loudly instead of silently moving to 3001 if 3000 is taken.

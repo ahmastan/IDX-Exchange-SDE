@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { fetchProperties } from "../api/client";
 import ListingsPage from "./ListingsPage";
 
@@ -25,6 +26,15 @@ function deferred() {
   return { promise, resolve };
 }
 
+// Property cards link to the detail page, so the page needs a router around it
+function renderPage() {
+  return render(
+    <MemoryRouter>
+      <ListingsPage />
+    </MemoryRouter>
+  );
+}
+
 let user;
 
 beforeEach(() => {
@@ -37,7 +47,7 @@ describe("ListingsPage", () => {
     vi.mocked(fetchProperties)
       .mockResolvedValueOnce(page(listing(1, "1 All St")))
       .mockResolvedValueOnce(page(listing(2, "2 Filtered Ave")));
-    render(<ListingsPage />);
+    renderPage();
     expect(await screen.findByText("1 All St")).toBeInTheDocument();
 
     await user.type(screen.getByLabelText("City"), "Irvine");
@@ -55,7 +65,7 @@ describe("ListingsPage", () => {
     vi.mocked(fetchProperties)
       .mockResolvedValueOnce(page(listing(1, "1 All St")))
       .mockResolvedValueOnce(page());
-    render(<ListingsPage />);
+    renderPage();
     await screen.findByText("1 All St");
 
     await user.type(screen.getByLabelText("City"), "Nowhere");
@@ -70,7 +80,7 @@ describe("ListingsPage", () => {
       .mockResolvedValueOnce(page(listing(1, "1 All St")))
       .mockResolvedValueOnce(page(listing(2, "2 Filtered Ave")))
       .mockResolvedValueOnce(page(listing(1, "1 All St")));
-    render(<ListingsPage />);
+    renderPage();
     await screen.findByText("1 All St");
     await user.type(screen.getByLabelText("City"), "Irvine");
     await user.click(screen.getByRole("button", { name: "Search" }));
@@ -96,7 +106,7 @@ describe("ListingsPage", () => {
       .mockReturnValueOnce(clear.promise)
       .mockReturnValueOnce(searchB.promise);
 
-    render(<ListingsPage />);
+    renderPage();
     await act(async () => initial.resolve(page(listing(1, "1 All St"))));
 
     await user.type(screen.getByLabelText("City"), "Irvine");
@@ -124,7 +134,7 @@ describe("ListingsPage", () => {
     vi.mocked(fetchProperties)
       .mockResolvedValueOnce(page(listing(1, "1 All St")))
       .mockRejectedValueOnce(new Error("Could not reach the property server."));
-    render(<ListingsPage />);
+    renderPage();
     await screen.findByText("1 All St");
 
     await user.type(screen.getByLabelText("City"), "Irvine");
@@ -152,7 +162,7 @@ describe("ListingsPage", () => {
 
     it("shows the controls below the grid with a results summary", async () => {
       vi.mocked(fetchProperties).mockResolvedValueOnce(pageOf(1234, 0, listing(1, "1 All St")));
-      render(<ListingsPage />);
+      renderPage();
       await screen.findByText("1 All St");
 
       expect(screen.getByText("Showing 1-1 of 1,234 properties")).toBeInTheDocument();
@@ -163,7 +173,7 @@ describe("ListingsPage", () => {
 
     it("hides the controls when everything fits on one page", async () => {
       vi.mocked(fetchProperties).mockResolvedValueOnce(pageOf(20, 0, listing(1, "1 All St")));
-      render(<ListingsPage />);
+      renderPage();
       await screen.findByText("1 All St");
 
       expect(screen.queryByRole("navigation", { name: "Pagination" })).not.toBeInTheDocument();
@@ -173,7 +183,7 @@ describe("ListingsPage", () => {
       vi.mocked(fetchProperties)
         .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
         .mockResolvedValueOnce(pageOf(45, 40, listing(2, "2 Last Page Ln")));
-      render(<ListingsPage />);
+      renderPage();
       await screen.findByText("1 All St");
 
       await user.click(pageButton(3));
@@ -190,7 +200,7 @@ describe("ListingsPage", () => {
         .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
         .mockResolvedValueOnce(pageOf(45, 0, listing(2, "2 Irvine Rd")))
         .mockResolvedValueOnce(pageOf(45, 20, listing(3, "3 Irvine Rd")));
-      render(<ListingsPage />);
+      renderPage();
       await screen.findByText("1 All St");
       await user.type(screen.getByLabelText("City"), "Irvine");
       await user.click(screen.getByRole("button", { name: "Search" }));
@@ -210,7 +220,7 @@ describe("ListingsPage", () => {
         .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
         .mockResolvedValueOnce(pageOf(45, 40, listing(2, "2 Last Page Ln")))
         .mockResolvedValueOnce(pageOf(45, 0, listing(3, "3 Irvine Rd")));
-      render(<ListingsPage />);
+      renderPage();
       await screen.findByText("1 All St");
       await user.click(pageButton(3));
       await screen.findByText("2 Last Page Ln");
@@ -232,7 +242,7 @@ describe("ListingsPage", () => {
         .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
         .mockResolvedValueOnce(pageOf(45, 20, listing(2, "2 Next Page Ln")))
         .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")));
-      render(<ListingsPage />);
+      renderPage();
       await screen.findByText("1 All St");
       await user.click(pageButton(2));
       await screen.findByText("2 Next Page Ln");
@@ -250,7 +260,7 @@ describe("ListingsPage", () => {
         .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
         .mockReturnValueOnce(second.promise)
         .mockReturnValueOnce(third.promise);
-      render(<ListingsPage />);
+      renderPage();
       await screen.findByText("1 All St");
       await user.click(pageButton(2));
       // Loading: the controls are gone, so leave through a new search instead
@@ -268,7 +278,7 @@ describe("ListingsPage", () => {
         .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
         .mockResolvedValueOnce(pageOf(30, 40))
         .mockResolvedValueOnce(pageOf(30, 20, listing(2, "2 New Last Ln")));
-      render(<ListingsPage />);
+      renderPage();
       await screen.findByText("1 All St");
 
       await user.click(pageButton(3));
@@ -283,7 +293,7 @@ describe("ListingsPage", () => {
         .mockResolvedValueOnce(pageOf(45, 0, listing(1, "1 All St")))
         .mockRejectedValueOnce(new Error("Could not reach the property server."))
         .mockResolvedValueOnce(pageOf(45, 20, listing(2, "2 Next Page Ln")));
-      render(<ListingsPage />);
+      renderPage();
       await screen.findByText("1 All St");
       await user.click(pageButton(2));
       await screen.findByText("Could not reach the property server.");

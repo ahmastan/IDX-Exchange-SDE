@@ -25,3 +25,28 @@ export function formatNumber(value) {
   const n = toNumber(value);
   return n === null ? null : numberFormatter.format(n);
 }
+
+// RETS enum values are PascalCase and comma-separated, e.g.
+// "MainLevelPrimary,PrimarySuite" -> "Main Level Primary, Primary Suite".
+// Returns null for blank values and for "None".
+export function formatEnumList(value) {
+  if (typeof value !== "string") return null;
+  const items = value
+    .split(",")
+    .map((item) =>
+      item
+        .trim()
+        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+        .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+    )
+    .filter((item) => item && item.toLowerCase() !== "none");
+  return items.length ? items.join(", ") : null;
+}
+
+// Yes/No flags come back as 1/0, "1"/"0", or "" (unknown). Returns "Yes",
+// "No", or null when unknown.
+export function formatYesNo(value) {
+  if (value === 1 || value === "1" || value === true) return "Yes";
+  if (value === 0 || value === "0" || value === false) return "No";
+  return null;
+}
