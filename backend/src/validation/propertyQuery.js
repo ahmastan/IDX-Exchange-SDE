@@ -8,6 +8,15 @@ const WHOLE_NUMBER = /^\d+$/;
 const DECIMAL_NUMBER = /^\d+(\.\d+)?$/;
 const ZIPCODE = /^\d{5}$/;
 
+// Columns the results may be sorted by. These are the real rets_property
+// column names, not RESO names like ListPrice: an unknown name is rejected
+// with a 400 rather than silently returning unsorted results. Only names from
+// this list are ever placed into the ORDER BY clause.
+//   L_SystemPrice = price, ListingContractDate = date listed,
+//   LM_Int2_3 = sqft, L_Keyword2 = beds
+const SORTABLE_COLUMNS = ["L_SystemPrice", "ListingContractDate", "LM_Int2_3", "L_Keyword2"];
+const SORT_ORDERS = ["asc", "desc"];
+
 function parsePropertyQuery(query) {
   const errors = [];
   const value = { limit: DEFAULT_LIMIT, offset: 0, filters: {} };
@@ -82,7 +91,27 @@ function parsePropertyQuery(query) {
     }
   }
 
+  const sortBy = read("sortBy");
+  const sortOrder = read("sortOrder");
+  if (sortBy !== undefined) {
+    if (!SORTABLE_COLUMNS.includes(sortBy)) {
+      errors.push(`sortBy must be one of: ${SORTABLE_COLUMNS.join(", ")}`);
+    } else {
+      value.sort = { column: sortBy, order: "asc" };
+    }
+  }
+  if (sortOrder !== undefined) {
+    const order = sortOrder.toLowerCase();
+    if (!SORT_ORDERS.includes(order)) {
+      errors.push("sortOrder must be asc or desc");
+    } else if (sortBy === undefined) {
+      errors.push("sortOrder requires sortBy");
+    } else if (value.sort) {
+      value.sort.order = order;
+    }
+  }
+
   return errors.length ? { errors } : { value };
 }
 
-module.exports = { parsePropertyQuery, DEFAULT_LIMIT, MAX_LIMIT };
+module.exports = { parsePropertyQuery, DEFAULT_LIMIT, MAX_LIMIT, SORTABLE_COLUMNS };

@@ -1,0 +1,374 @@
+.calendar-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+
+.calendar-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.calendar-page__header h1 {
+  margin: 0 0 4px;
+  font-size: 2rem;
+}
+
+.calendar-page__summary {
+  min-height: 1.5em;
+  margin: 0;
+  color: var(--muted-text);
+}
+
+.calendar-page__nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-page__nav button {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.calendar-page__nav .calendar-page__today {
+  font-size: 0.95rem;
+}
+
+.calendar-page__nav button:hover {
+  border-color: var(--accent);
+}
+
+.calendar-page__month {
+  min-width: 10ch;
+  margin: 0;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.calendar-page__error {
+  margin-bottom: 16px;
+  padding: 16px 20px;
+  border: 1px solid var(--error-border);
+  border-radius: 12px;
+  background: var(--error-surface);
+  color: var(--error-text);
+}
+
+.calendar-page__error p {
+  margin: 0 0 12px;
+}
+
+.calendar-page__error button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--error-text);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.calendar {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.calendar[aria-busy="true"] .calendar__grid {
+  opacity: 0.5;
+}
+
+.calendar__weekdays,
+.calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.calendar__weekdays div {
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.calendar__grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.calendar__day {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  min-height: 118px;
+  padding: 4px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.calendar__day:nth-child(7n) {
+  border-right: none;
+}
+
+.calendar__day:nth-last-child(-n + 7) {
+  border-bottom: none;
+}
+
+.calendar__day--outside {
+  background: var(--background);
+}
+
+.calendar__day--outside .calendar__date span:first-child {
+  color: var(--muted-text);
+}
+
+.calendar__day--selected {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.calendar__date {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+  padding: 2px 4px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.calendar__date:hover {
+  background: var(--background);
+}
+
+.calendar__day--today .calendar__date span:first-child {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+}
+
+.calendar__badge {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.75rem;
+  line-height: 18px;
+}
+
+.calendar__events {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.calendar__event {
+  display: block;
+  overflow: hidden;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 0.75rem;
+  text-decoration: none;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.calendar__event:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.calendar__event-time {
+  font-weight: 600;
+}
+
+.calendar__more {
+  align-self: flex-start;
+  padding: 1px 6px;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.calendar__loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+  transform: translate(-50%, -50%);
+}
+
+.calendar-page__hint {
+  margin: 20px 0 0;
+  color: var(--muted-text);
+  text-align: center;
+}
+
+.day-list {
+  margin-top: 24px;
+}
+
+.day-list h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+}
+
+.day-list__count {
+  color: var(--muted-text);
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+.day-list__empty {
+  color: var(--muted-text);
+}
+
+.day-list__items {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  list-style: none;
+}
+
+.day-list__items li + li {
+  border-top: 1px solid var(--border);
+}
+
+.day-list__item {
+  display: flex;
+  gap: 16px;
+  padding: 12px 16px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.day-list__item:hover {
+  background: var(--background);
+}
+
+.day-list__time {
+  flex: 0 0 11rem;
+  color: var(--accent);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.day-list__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.day-list__meta {
+  color: var(--muted-text);
+  font-size: 0.9rem;
+}
+
+.day-list__remarks {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 4px;
+  font-size: 0.9rem;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.day-list__more {
+  display: block;
+  margin: 16px auto 0;
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Phones: no room for event text in a cell, so each day shows its number and
+   count, and tapping it opens the day list below */
+@media (max-width: 720px) {
+  .calendar-page {
+    padding: 20px 16px 32px;
+  }
+
+  .calendar__day {
+    min-height: 64px;
+    padding: 2px;
+  }
+
+  .calendar__date {
+    flex-direction: column;
+    height: 100%;
+    padding: 4px 0;
+  }
+
+  .calendar__events,
+  .calendar__more {
+    display: none;
+  }
+
+  .calendar__badge {
+    padding: 0 4px;
+    font-size: 0.7rem;
+  }
+
+  .day-list__item {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .day-list__time {
+    flex-basis: auto;
+  }
+}

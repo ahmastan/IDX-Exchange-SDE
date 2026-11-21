@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { formatNumber, formatPrice } from "../utils/format";
 import PropertyImageCarousel from "./PropertyImageCarousel";
+import FavoriteButton from "./FavoriteButton";
 import "./PropertyCard.css";
 
 // RETS column names, for reference:
@@ -23,6 +24,7 @@ export default function PropertyCard({ property }) {
     <article className="property-card">
       <div className="property-card__media">
         <PropertyImageCarousel photos={property.L_Photos} alt={`Photo of ${address}`} />
+        <FavoriteButton property={property} className="favorite-button--card" />
       </div>
 
       <div className="property-card__body">

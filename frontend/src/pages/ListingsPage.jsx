@@ -4,6 +4,8 @@ import { formatNumber } from "../utils/format";
 import PropertyCard from "../components/PropertyCard";
 import PropertyFilters from "../components/PropertyFilters";
 import Pagination from "../components/Pagination";
+import SortSelect from "../components/SortSelect";
+import { DEFAULT_SORT, toSortParams } from "../utils/sort";
 import "./ListingsPage.css";
 
 const DEFAULT_ITEMS_PER_PAGE = 20;
@@ -16,6 +18,9 @@ export default function ListingsPage() {
   // Search and Clear always set a new object, so the effect below re-runs even
   // when the values are the same as before.
   const [filters, setFilters] = useState({});
+  // One of the SORT_OPTIONS values, e.g. "L_SystemPrice:asc". It lives here,
+  // next to the filters and page, because all three decide what to fetch.
+  const [sort, setSort] = useState(DEFAULT_SORT);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
   // Bumping this re-runs the effect, which is how "Try again" refetches
@@ -29,7 +34,10 @@ export default function ListingsPage() {
     // running effects twice in development.
     const controller = new AbortController();
     const offset = (currentPage - 1) * itemsPerPage;
-    fetchProperties({ ...filters, limit: itemsPerPage, offset }, { signal: controller.signal })
+    fetchProperties(
+      { ...filters, ...toSortParams(sort), limit: itemsPerPage, offset },
+      { signal: controller.signal }
+    )
       .then((data) => {
         // Belt and braces: never apply a response for a cancelled request
         if (controller.signal.aborted) return;
@@ -46,21 +54,30 @@ export default function ListingsPage() {
         setState({ status: "error", data: null, error: err.message });
       });
     return () => controller.abort();
-  }, [filters, currentPage, itemsPerPage, attempt]);
+  }, [filters, sort, currentPage, itemsPerPage, attempt]);
 
   // Every handler below switches to the loading state in the same render that
   // changes what to fetch. Doing it inside the effect would be too late: effects
   // run after the browser paints, so the previous results would flash for a
   // frame under the new filters (the other half of the debug challenge).
 
-  // New filters mean a new result set, so always start again from page 1
+  // New filters mean a new result set, so start again from page 1 in the
+  // default order
   function search(nextFilters) {
     setState(LOADING);
     setFilters(nextFilters);
+    setSort(DEFAULT_SORT);
     setCurrentPage(1);
   }
 
-  // Filters aren't touched here, so the new page keeps the active search
+  // A new order changes what page 1 holds, so go back to it. Filters stay.
+  function changeSort(nextSort) {
+    setState(LOADING);
+    setSort(nextSort);
+    setCurrentPage(1);
+  }
+
+  // Filters and sort aren't touched here, so the new page keeps both
   function goToPage(page) {
     setState(LOADING);
     setCurrentPage(page);
@@ -80,15 +97,21 @@ export default function ListingsPage() {
     <main className="listings-page">
       <header className="listings-page__header">
         <h1>Property Listings</h1>
-        {hasResults && (
-          <p className="listings-page__count">
-            Showing {formatNumber(data.offset + 1)}-{formatNumber(data.offset + data.results.length)} of{" "}
-            {formatNumber(data.total)} {data.total === 1 ? "property" : "properties"}
-          </p>
-        )}
       </header>
 
       <PropertyFilters onSearch={search} onClear={() => search({})} />
+
+      <div className="listings-page__toolbar">
+        <p className="listings-page__count">
+          {hasResults && (
+            <>
+              Showing {formatNumber(data.offset + 1)}-{formatNumber(data.offset + data.results.length)} of{" "}
+              {formatNumber(data.total)} {data.total === 1 ? "property" : "properties"}
+            </>
+          )}
+        </p>
+        <SortSelect value={sort} onChange={changeSort} />
+      </div>
 
       {status === "loading" && (
         <p className="listings-page__message" role="status">

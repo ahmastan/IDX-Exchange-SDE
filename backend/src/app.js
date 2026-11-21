@@ -3,6 +3,7 @@ const cors = require("cors");
 const requestLogger = require("./middleware/requestLogger");
 const healthRouter = require("./routes/health");
 const propertiesRouter = require("./routes/properties");
+const openHousesRouter = require("./routes/openHouses");
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 
 app.use("/api/health", healthRouter);
 app.use("/api/properties", propertiesRouter);
+app.use("/api/openhouses", openHousesRouter);
 
 // Unknown routes
 app.use((req, res) => {

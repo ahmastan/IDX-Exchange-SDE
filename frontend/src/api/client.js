@@ -63,7 +63,8 @@ async function request(path, { signal } = {}) {
 }
 
 // GET /api/properties: resolves to { total, limit, offset, results }.
-// params: city, zipcode, minPrice, maxPrice, beds, baths, limit, offset
+// params: city, zipcode, minPrice, maxPrice, beds, baths, sortBy, sortOrder,
+// limit, offset
 export function fetchProperties(params, options) {
   return request(`/api/properties${toQueryString(params)}`, options);
 }
@@ -76,4 +77,10 @@ export function fetchPropertyDetail(id, options) {
 // GET /api/properties/:id/openhouses: resolves to an array, soonest first
 export function fetchOpenHouses(id, options) {
   return request(`/api/properties/${encodeURIComponent(id)}/openhouses`, options);
+}
+
+// GET /api/openhouses: every open house between two "YYYY-MM-DD" dates
+// (inclusive, at most 366 days), soonest first. Resolves to an array.
+export function fetchOpenHouseCalendar(startDate, endDate, options) {
+  return request(`/api/openhouses${toQueryString({ startDate, endDate })}`, options);
 }

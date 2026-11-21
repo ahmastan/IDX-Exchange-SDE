@@ -15,7 +15,9 @@ const router = express.Router();
 // unhandled rejection.
 
 // GET /api/properties — paginated, filterable property search.
-// Query params: city, zipcode, minPrice, maxPrice, beds, baths, limit, offset
+// Query params: city, zipcode, minPrice, maxPrice, beds, baths, limit, offset,
+// sortBy (L_SystemPrice | ListingContractDate | LM_Int2_3 | L_Keyword2),
+// sortOrder (asc | desc, default asc)
 router.get("/", async (req, res) => {
   const { value, errors } = parsePropertyQuery(req.query);
   if (errors) {

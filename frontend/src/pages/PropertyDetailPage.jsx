@@ -6,6 +6,7 @@ import { getCoordinates } from "../utils/map";
 import PropertyImageGallery from "../components/PropertyImageGallery";
 import PropertyMap from "../components/PropertyMap";
 import OpenHouseList from "../components/OpenHouseList";
+import FavoriteButton from "../components/FavoriteButton";
 import "./PropertyDetailPage.css";
 
 // The detail and the open houses load in parallel and fail independently: a
@@ -146,7 +147,10 @@ function PropertyDetail({ property, openHouseResult, onRetry }) {
           <h1 className="detail__address">{address}</h1>
           {location && <p className="detail__location">{location}</p>}
         </div>
-        {status && <span className="detail__status">{formatEnumList(status)}</span>}
+        <div className="detail__header-actions">
+          {status && <span className="detail__status">{formatEnumList(status)}</span>}
+          <FavoriteButton property={property} />
+        </div>
       </header>
 
       <ul className="detail__stats" aria-label="Key facts">

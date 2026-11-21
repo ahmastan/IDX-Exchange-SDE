@@ -13,9 +13,38 @@
   font-size: 2rem;
 }
 
+.listings-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
 .listings-page__count {
   margin: 0;
   color: var(--muted-text);
+}
+
+.sort-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+.sort-select span {
+  color: var(--muted-text);
+}
+
+.sort-select select {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
 }
 
 /* As many 280px+ columns as fit, so the grid reflows from phone to desktop */
